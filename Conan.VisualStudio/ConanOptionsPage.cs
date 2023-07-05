@@ -15,6 +15,7 @@ namespace Conan.VisualStudio
         private bool? _conanInstallAutomatically;
         private ConanBuildType? _conanBuild;
         private bool? _conanUpdate;
+        private bool? _evaluateMacrosInInstallationPath;
 
         protected override void OnApply(PageApplyEventArgs e)
         {
@@ -100,6 +101,15 @@ namespace Conan.VisualStudio
         {
             get => _conanUpdate ?? true;
             set => _conanUpdate = value;
+        }
+
+        [Category("Conan")]
+        [DisplayName("Evaluate macros")]
+        [Description(@"Evaluate macros in installation path when add to project property sheets")]
+        public bool EvaluateMacrosInInstallationPath
+        {
+            get => _evaluateMacrosInInstallationPath ?? false;
+            set => _evaluateMacrosInInstallationPath = value;
         }
     }
 }

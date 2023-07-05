@@ -134,7 +134,12 @@ namespace Conan.VisualStudio.Services
             string installPath = ".conan";
             if (settingsService != null)
             {
-                installPath = configuration.Evaluate(settingsService.GetConanInstallationPath());
+                var settingsInstallPath = settingsService.GetConanInstallationPath();
+                bool evaluateMacros = settingsService.GetEvaluateMacrosInInstallationPath();
+                if (!evaluateMacros)
+                    return settingsInstallPath;
+
+                installPath = configuration.Evaluate(settingsInstallPath);
                 if (!Path.IsPathRooted(installPath))
                     installPath = Path.Combine(configuration.ProjectDirectory, installPath);
                 return installPath;
@@ -172,7 +177,7 @@ namespace Conan.VisualStudio.Services
                 BuildType = GetBuildType(configuration.ConfigurationName),
                 CompilerToolset = configuration.Toolset,
                 CompilerVersion = VisualStudioVersion.ToString(),
-                InstallPath = installPath,
+                InstallPath = configuration.Evaluate(installPath),
                 RuntimeLibrary = configuration.RuntimeLibrary
             };
         }

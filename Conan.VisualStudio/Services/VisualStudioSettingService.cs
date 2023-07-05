@@ -55,5 +55,10 @@ namespace Conan.VisualStudio.Services
         {
             return GetConanPage().ConanUpdate;
         }
+
+        public bool GetEvaluateMacrosInInstallationPath()
+        {
+            return GetConanPage().EvaluateMacrosInInstallationPath;
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Conan.VisualStudio.Core;
@@ -36,22 +37,30 @@ namespace Conan.VisualStudio.Services
 
         private void IntegrateIntoConfiguration(IVCConfiguration configuration)
         {
-            string absPropFilePath = GetPropsFilePath(configuration);
-            string relativePropFilePath = ConanPathHelper.GetRelativePath(configuration.ProjectDirectory, absPropFilePath);
+            string propFilePath = GetPropsFilePath(configuration);
+            string absPropFilePath = configuration.Evaluate(propFilePath);
 
             configuration.AdditionalDependencies = configuration.AdditionalDependencies.Replace("$(NOINHERIT)", "");
 
             foreach (IVCPropertySheet sheet in configuration.PropertySheets)
             {
-                if (ConanPathHelper.NormalizePath(sheet.PropertySheetFile) == ConanPathHelper.NormalizePath(absPropFilePath))
+                string absPropertySheetFilePath = configuration.Evaluate(sheet.PropertySheetFile);
+                if (ConanPathHelper.NormalizePath(absPropertySheetFilePath) == ConanPathHelper.NormalizePath(absPropFilePath))
                 {
-                    string msg = $"[Conan.VisualStudio] Property sheet '{absPropFilePath}' already added to project {configuration.ProjectName}";
+                    string msg = $"[Conan.VisualStudio] Property sheet '{propFilePath}' already added to project {configuration.ProjectName}. Absolute path: {absPropFilePath}";
                     Logger.Log(msg);
                     return;
                 }
             }
-            configuration.AddPropertySheet(relativePropFilePath);
-            Logger.Log($"[Conan.VisualStudio] Property sheet '{absPropFilePath}' added to project {configuration.ProjectName}");
+
+            // Calc relative path from project if needed
+            if (_settingsService != null && _settingsService.GetEvaluateMacrosInInstallationPath())
+            {
+                propFilePath = ConanPathHelper.GetRelativePath(configuration.ProjectDirectory, absPropFilePath);
+            }
+
+            configuration.AddPropertySheet(propFilePath);
+            Logger.Log($"[Conan.VisualStudio] Property sheet '{propFilePath}' added to project {configuration.ProjectName}. Absolute path: {absPropFilePath}");
             configuration.CollectIntelliSenseInfo();
         }
 

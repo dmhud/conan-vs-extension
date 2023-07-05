@@ -28,5 +28,7 @@ namespace Conan.VisualStudio.Services
 
         ConanBuildType GetConanBuild();
         bool GetConanUpdate();
+
+        bool GetEvaluateMacrosInInstallationPath();
     }
 }
