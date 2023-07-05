@@ -40,16 +40,30 @@ namespace Conan.VisualStudio.Services
             string propFilePath = GetPropsFilePath(configuration);
             string absPropFilePath = configuration.Evaluate(propFilePath);
 
+            Logger.Log($"[Conan.VisualStudio][DEBUG] propFilePath: {propFilePath}");
+            Logger.Log($"[Conan.VisualStudio][DEBUG] absPropFilePath: {absPropFilePath}");
+
             configuration.AdditionalDependencies = configuration.AdditionalDependencies.Replace("$(NOINHERIT)", "");
 
             foreach (IVCPropertySheet sheet in configuration.PropertySheets)
             {
                 string absPropertySheetFilePath = configuration.Evaluate(sheet.PropertySheetFile);
+
+                Logger.Log($"[Conan.VisualStudio][DEBUG] sheet.PropertySheetFile: {sheet.PropertySheetFile}");
+                Logger.Log($"[Conan.VisualStudio][DEBUG] absPropertySheetFilePath: {absPropertySheetFilePath}");
+
+                Logger.Log($"[Conan.VisualStudio][DEBUG] NormalizePath(sheet.PropertySheetFile): {ConanPathHelper.NormalizePath(absPropertySheetFilePath)}");
+                Logger.Log($"[Conan.VisualStudio][DEBUG] NormalizePath(absPropertySheetFilePath): {ConanPathHelper.NormalizePath(absPropFilePath)}");
+                
                 if (ConanPathHelper.NormalizePath(absPropertySheetFilePath) == ConanPathHelper.NormalizePath(absPropFilePath))
                 {
                     string msg = $"[Conan.VisualStudio] Property sheet '{propFilePath}' already added to project {configuration.ProjectName}. Absolute path: {absPropFilePath}";
                     Logger.Log(msg);
                     return;
+                }
+                else
+                {
+                    Logger.Log($"[Conan.VisualStudio][DEBUG] Not equal. Go to next property sheet");
                 }
             }
 
